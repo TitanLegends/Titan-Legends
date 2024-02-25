@@ -10,8 +10,6 @@ $LGNDX/$DragonX Initial LP
 
 0/0 TAX TOKEN
 
-1% Max Wallet to be lifted approx. 30-60 mins post-launch.
-
 TitanLegendsBattlefield.sol Overview:
 
 The "Battlefield" is the escrow/staking contract for Titan Legends NFTs and $LGNDX token. Users have the option to lock their NFT in the smart contract and claim a "bounty" of a set amount of $LGNDX tokens per a points system as described in the Whitepaper below. The only way to receive back their NFT is by paying a "ransom" plus a small premium back to the smart contract. This creates a system where each NFT has a liquid value attached to it redeemable at any time. Since many many people will claim their tokens and never retrieve back their NFT, the Titan Legends collection will become hyper deflationary over time. Additionally, there is a 3% burn of the $LGNDX token on each "claim bounty" or "pay ransom" transaction, making the $LGNDX token deflationary as well.
