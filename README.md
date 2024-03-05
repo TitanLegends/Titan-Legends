@@ -6,7 +6,7 @@ LGNDX Token Overview:
 
 2,888,888,888 TOTAL SUPPLY
 
-$LGNDX/$DragonX Initial LP
+$LGNDX/$TITANX Initial LP
 
 0/0 TAX TOKEN
 
