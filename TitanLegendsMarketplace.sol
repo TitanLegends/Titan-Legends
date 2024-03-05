@@ -63,10 +63,14 @@ contract TitanLegendsMarketplace is ERC721Holder, ReentrancyGuard, Ownable {
         emit ListingAdded(listingId, tokenId, msg.sender, price);
     }
 
-    function buyListing(uint256 listingId) public payable nonReentrant {
+    function buyListing(
+        uint256 listingId,
+        uint256 price
+    ) public payable nonReentrant {
         require(tx.origin == _msgSender(), "Contracts are prohibited");
         require(isListingActive(listingId), "Listing is not active");
         Listing memory listing = listings[listingId];
+        require(listing.price == price, "Incorrect price provided");
         uint256 _marketplaceFee = (listing.price * marketplaceFee) / 10000;
         titanX.transferFrom(msg.sender, feeStorage, _marketplaceFee);
         titanX.transferFrom(
@@ -125,4 +129,9 @@ contract TitanLegendsMarketplace is ERC721Holder, ReentrancyGuard, Ownable {
         require(fee <= 800, "MArketplace fee should not exceed 8 percent");
         marketplaceFee = fee;
     }
+
+    function setFeeStorage(address storageAdr) external onlyOwner {
+        feeStorage = storageAdr;
+    }
 }
+
