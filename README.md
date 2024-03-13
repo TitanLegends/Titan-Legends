@@ -1,12 +1,12 @@
 Titan Legends // $LGNDX - NFT/Token Hybrid
 
-Titan Legends introduces a novel NFT // TOKEN Hybrid model through an innovative two-way escrow mechanism which solves the problem of liquidity in the NFT space. This innovative mechanism allows users to lock their Titan Legends NFTs in exchange for LegendX ($LGNDX) tokens and vice versa, successfully blending generative art NFTs with the liquidity of an ERC-20 token. This not only creates a hyper-deflationary NFT collection, but also supports deflation in the $LGNDX token as users interact with the system. 
+Titan Legends introduces a novel NFT // TOKEN Hybrid model through an innovative two-way escrow mechanism which solves the problem of liquidity in the NFT space. This innovative mechanism allows users to lock their Titan Legends NFTs in exchange for LegendX ($LGNDX) tokens and vice versa, successfully blending generative art NFTs with the liquidity of an PRC-20 token. This not only creates a hyper-deflationary NFT collection, but also supports deflation in the $LGNDX token as users interact with the system. 
 
 LGNDX Token Overview:
 
 2,888,888,888 TOTAL SUPPLY
 
-$LGNDX/$TITANX Initial LP
+$LGNDX/$wTITANX Initial LP
 
 0/0 TAX TOKEN
 
@@ -16,9 +16,8 @@ The "Battlefield" is the escrow/staking contract for Titan Legends NFTs and $LGN
 
 TitanLegendsMarketplace.sol Overview:
 
-The NFT Marketplace is the first marketplace where users are able to buy and sell Titan Legends NFTS natively in the $TITANX token. Since the NFTs were originally minted using the $TITANX token, it will allow users to keep transactions within the exosystem, adding to the utility of TitanX. Per each transaction, there is a 3% marketplace fee in $TITANX that is directed towards the DragonX vault, removing $TITANX from circulation.
+The NFT Marketplace is the first marketplace where users are able to buy and sell Titan Legends NFTS natively in the $TITANX token. Since the NFTs were originally minted using the $TITANX token, it will allow users to keep transactions within the exosystem, adding to the utility of TitanX. Per each transaction, there is a 3% marketplace fee in $TITANX that will remove $TITANX from circulation.
 
-DragonX Vault Contract Address: 0x96a5399d07896f757bd4c6ef56461f58db951862
 
 Read more in the Whitepaper here:
 https://docs.titanlegends.win/
