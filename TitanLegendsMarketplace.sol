@@ -38,7 +38,7 @@ contract TitanLegendsMarketplace is ERC721Holder, ReentrancyGuard, Ownable2Step 
         feeStorage = feeStorageAddress;
     }
 
-    function addListing(uint256 tokenId, uint256 price) external {
+    function addListing(uint256 tokenId, uint256 price) external nonReentrant {
         require(price > 0, "Price must be greater than zero");
         uint256 listingId = currentListingId;
         titanLegends.safeTransferFrom(msg.sender, address(this), tokenId);
@@ -74,7 +74,7 @@ contract TitanLegendsMarketplace is ERC721Holder, ReentrancyGuard, Ownable2Step 
         emit ListingRemoved(listingId);
     }
 
-    function editListing(uint256 listingId, uint256 newPrice) external {
+    function editListing(uint256 listingId, uint256 newPrice) external nonReentrant {
         require(isListingActive(listingId), "Listing is not active");
         Listing storage listing = listings[listingId];
         require(listing.owner == msg.sender, "Not authorized");
