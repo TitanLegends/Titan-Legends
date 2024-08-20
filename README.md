@@ -12,7 +12,7 @@ $LGNDX/$TITANX Initial LP
 
 TitanLegendsBattlefield.sol Overview:
 
-The "Battlefield" is the escrow/staking contract for Titan Legends NFTs and $LGNDX token. Users have the option to lock their NFT in the smart contract and claim a "bounty" of a set amount of $LGNDX tokens per a points system as described in the Whitepaper below. Users then have the option to pay the Bounty (puchase) any NFT out of the Battlefield at ANY time. This creates a system where each NFT has a liquid value attached to it redeemable whenever the user chooses to. Additionally, there is a 3% burn of the $LGNDX token on each "claim bounty" or "pay ransom" transaction, making the $LGNDX token deflationary as well.
+The "Battlefield" is the escrow/swap contract for Titan Legends NFTs and $LGNDX token. Users have the option to lock their NFT in the smart contract and claim a "bounty" of a set amount of $LGNDX tokens per a points system as described in the Whitepaper below. Users then have the option to pay the Bounty (puchase) any NFT out of the Battlefield at ANY time. This creates a system where each NFT has a liquid value attached to it redeemable whenever the user chooses to. Additionally, there is a 3% burn of the $LGNDX token on each "claim bounty" or "pay ransom" transaction, making the $LGNDX token deflationary as well.
 
 TitanLegendsMarketplace.sol Overview:
 
