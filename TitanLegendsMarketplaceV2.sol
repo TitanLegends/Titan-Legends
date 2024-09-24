@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "./helpers/FullMath.sol";
 import "./helpers/TickMath.sol";
+import "./helpers/OracleLibrary.sol";
 
 contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Step {
     struct Listing {
@@ -80,13 +81,12 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
         require(isListingActive(listingId), "Listing is not active");
         Listing memory listing = listings[listingId];
         require(listing.price == price, "Incorrect price provided");
-        uint256 ethPrice = getCurrentEthPrice();
+        uint256 ethPrice = getgetTwapEthPriceTWAP();
+
         uint256 priceInEth = FullMath.mulDiv(price, ethPrice, 1e18);
-        uint256 twap = getTWAP(10);
-        if (twap > ethPrice) {
-            require(twap - ethPrice <= ethPrice * slippage / 100, "Price changed");
-        }
+
         require(msg.value >= priceInEth, "Insufficient ETH sent");
+
         uint256 _marketplaceFee = (priceInEth * marketplaceFee) / 10000;
         activeListings.remove(listingId);
         delete listings[listingId];
@@ -147,30 +147,15 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
         slippage = limit;
     }
 
-    function getTWAP(uint32 secondsAgo) public view returns (uint256 price) {
-        uint32[] memory secondsAgos = new uint32[](2);
-        secondsAgos[0] = secondsAgo;
-        secondsAgos[1] = 0;
+    function getTwapEthPrice() public view returns (uint256 price) {
+        address poolAddress = TITANX_WETH_POOL;
+        uint32 secondsAgo = 15 * 60;
+        uint32 oldestObservation = OracleLibrary.getOldestObservationSecondsAgo(poolAddress);
+        if (oldestObservation < secondsAgo) secondsAgo = oldestObservation;
 
-        (int56[] memory tickCumulatives,) = IUniswapV3Pool(TITANX_WETH_POOL).observe(secondsAgos);
-
-        int56 tickCumulativesDelta = tickCumulatives[1] - tickCumulatives[0];
-
-        int24 arithmeticMeanTick = int24(tickCumulativesDelta / int56(int32(secondsAgo)));
-        if (tickCumulativesDelta < 0 && (tickCumulativesDelta % int56(int32(secondsAgo)) != 0)) arithmeticMeanTick--;
-
+        (int24 arithmeticMeanTick,) = OracleLibrary.consult(poolAddress, secondsAgo);
         uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(arithmeticMeanTick);
-        uint256 sqrtPriceX192 = uint256(sqrtPriceX96) * sqrtPriceX96;
-        price = FullMath.mulDiv(sqrtPriceX192, 1e18, 1 << 192);
-        price = 1e36 / price;
-    }
 
-    function getCurrentEthPrice() public view returns (uint256 price) {
-        IUniswapV3Pool pool = IUniswapV3Pool(TITANX_WETH_POOL);
-        (uint160 sqrtPriceX96,,,,,,) = pool.slot0();
-
-        uint256 sqrtPriceX192 = uint256(sqrtPriceX96) * sqrtPriceX96;
-        price = FullMath.mulDiv(sqrtPriceX192, 1e18, 1 << 192);
-        price = 1e36 / price;
+        quote = OracleLibrary.getQuoteForSqrtRatioX96(sqrtPriceX96, 1e18, address(titanX), WETH9);
     }
 }
