@@ -26,6 +26,7 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
 
     uint256 public currentListingId;
     uint64 public marketplaceFee;
+    uint32 public secondsAgo = 5 * 60;
     address private feeStorage;
     IERC721 public immutable collection;
     IERC20 public immutable titanX;
@@ -37,7 +38,7 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
     error ZeroPrice();
     error InactiveListing();
     error IncorrectPrice();
-    error IncorrectFee();
+    error IncorrectInput();
     error InsufficientEth();
     error Unauthorized();
     error ContractProhibited();
@@ -139,8 +140,8 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
     }
 
     function setMarketplaceFee(uint64 fee) external onlyOwner {
-        if (fee > 800) revert IncorrectFee();
-        if (fee == 0) revert IncorrectFee();
+        if (fee > 800) revert IncorrectInput();
+        if (fee == 0) revert IncorrectInput();
         marketplaceFee = fee;
     }
 
@@ -149,13 +150,18 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
         feeStorage = storageAdr;
     }
 
+    function setSecondsAgo(uint32 limit) external onlyOwner {
+        if (limit == 0) revert IncorrectInput();
+        secondsAgo = limit;
+    }
+
     function getTwapEthPrice() public view returns (uint256 quote) {
         address poolAddress = TITANX_WETH_POOL;
-        uint32 secondsAgo = 5 * 60;
+        uint32 _secondsAgo = secondsAgo;
         uint32 oldestObservation = OracleLibrary.getOldestObservationSecondsAgo(poolAddress);
-        if (oldestObservation < secondsAgo) secondsAgo = oldestObservation;
+        if (oldestObservation < _secondsAgo) _secondsAgo = oldestObservation;
 
-        (int24 arithmeticMeanTick,) = OracleLibrary.consult(poolAddress, secondsAgo);
+        (int24 arithmeticMeanTick,) = OracleLibrary.consult(poolAddress, _secondsAgo);
         uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(arithmeticMeanTick);
 
         quote = OracleLibrary.getQuoteForSqrtRatioX96(sqrtPriceX96, 1e18, address(titanX), WETH9);
