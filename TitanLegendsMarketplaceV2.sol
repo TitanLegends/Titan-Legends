@@ -162,7 +162,6 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
     }
 
     function _calculateFee(uint256 value) internal view returns (uint256) {
-        uint256 amount = value * marketplaceFee;
-        return amount / 10000 + (amount % 10000 == 0 ? 0 : 1);
+        return FullMath.mulDivRoundingUp(value, marketplaceFee, 10000);
     }
 }
