@@ -26,7 +26,10 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
 
     uint256 public currentListingId;
     uint64 public marketplaceFee;
+    
     uint32 public secondsAgo = 5 * 60;
+    uint32 public deviation = 300;
+
     address private feeStorage;
     IERC721 public immutable collection;
     IERC20 public immutable titanX;
@@ -42,6 +45,7 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
     error InsufficientEth();
     error Unauthorized();
     error ContractProhibited();
+    error Deviation();
 
     event ListingAdded(uint256 indexed listingId, uint256 indexed tokenId, address indexed owner, uint256 price);
     event ListingRemoved(uint256 indexed listingId);
@@ -91,8 +95,13 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
         if (!isListingActive(listingId)) revert InactiveListing();
         Listing memory listing = listings[listingId];
         if (listing.price != price) revert IncorrectPrice();
-        uint256 ethPrice = getTwapEthPrice();
-        uint256 priceInEth = FullMath.mulDiv(price, ethPrice, 1e18);
+
+        uint256 twapPrice = getTwapPrice();
+        uint256 spotPrice = getSpotPrice();
+        uint256 diff = twapPrice >= spotPrice ? twapPrice - spotPrice : spotPrice - twapPrice;
+        if(FullMath.mulDiv(spotPrice, deviation, 10000) < diff) revert Deviation();
+
+        uint256 priceInEth = FullMath.mulDiv(price, spotPrice, 1e18);
         if (msg.value < priceInEth) revert InsufficientEth();
 
         uint256 _marketplaceFee = _calculateFee(priceInEth);
@@ -155,7 +164,13 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
         secondsAgo = limit;
     }
 
-    function getTwapEthPrice() public view returns (uint256 quote) {
+    function setDeviation(uint32 limit) external onlyOwner {
+        if (limit == 0) revert IncorrectInput();
+        if (limit > 10000) revert IncorrectInput();
+        deviation = limit;
+    }
+
+    function getTwapPrice() public view returns (uint256 quote) {
         address poolAddress = TITANX_WETH_POOL;
         uint32 _secondsAgo = secondsAgo;
         uint32 oldestObservation = OracleLibrary.getOldestObservationSecondsAgo(poolAddress);
@@ -165,6 +180,15 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
         uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(arithmeticMeanTick);
 
         quote = OracleLibrary.getQuoteForSqrtRatioX96(sqrtPriceX96, 1e18, address(titanX), WETH9);
+    }
+
+    function getSpotPrice() public view returns (uint256) {
+        IUniswapV3Pool pool = IUniswapV3Pool(TITANX_WETH_POOL);
+        (uint256 sqrtPriceX96, , , , , , ) = pool.slot0();
+        uint256 numerator1 = sqrtPriceX96 ** 2;
+        uint256 price = FullMath.mulDiv(numerator1, 1e18, 1 << 192);
+        price = 1e36 / price;
+        return price;
     }
 
     function _calculateFee(uint256 value) internal view returns (uint256) {
