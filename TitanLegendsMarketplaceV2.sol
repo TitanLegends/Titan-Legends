@@ -46,6 +46,7 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
     error Unauthorized();
     error ContractProhibited();
     error Deviation();
+    error TransferFailed();
 
     event ListingAdded(uint256 indexed listingId, uint256 indexed tokenId, address indexed owner, uint256 price);
     event ListingRemoved(uint256 indexed listingId);
@@ -112,9 +113,9 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
         (bool ownerTx,) = listing.owner.call{value: priceInEth - _marketplaceFee}("");
         if (priceInEth < msg.value) {
             (bool refundTx,) = msg.sender.call{value: msg.value - priceInEth}("");
-            require(refundTx, "RF1");
+            if (!refundTx) revert TransferFailed();
         }
-        require(feeTx && ownerTx, "F1");
+        if (!feeTx || !ownerTx) revert TransferFailed();
         collection.safeTransferFrom(address(this), msg.sender, listing.tokenId);
         emit ListingSold(listingId, listing.tokenId, listing.price, msg.sender);
     }
@@ -184,11 +185,8 @@ contract TitanLegendsMarketplaceV2 is ERC721Holder, ReentrancyGuard, Ownable2Ste
 
     function getSpotPrice() public view returns (uint256) {
         IUniswapV3Pool pool = IUniswapV3Pool(TITANX_WETH_POOL);
-        (uint256 sqrtPriceX96, , , , , , ) = pool.slot0();
-        uint256 numerator1 = sqrtPriceX96 ** 2;
-        uint256 price = FullMath.mulDiv(numerator1, 1e18, 1 << 192);
-        price = 1e36 / price;
-        return price;
+        (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
+        return OracleLibrary.getQuoteForSqrtRatioX96(sqrtPriceX96, 1e18, address(titanX), WETH9);
     }
 
     function _calculateFee(uint256 value) internal view returns (uint256) {
