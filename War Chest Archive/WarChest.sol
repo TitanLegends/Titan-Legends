@@ -61,7 +61,7 @@ contract WarChest is ERC2981, ERC721A, Ownable2Step {
         uint256 totalSum = amount * price + burnSum;
         LegendX.safeTransferFrom(msg.sender, address(this), totalSum);
         LegendX.burn(burnSum);
-        _mint(msg.sender, amount);
+        _safeMint(msg.sender, amount);
         emit Mint(amount);
     }
 
@@ -82,7 +82,7 @@ contract WarChest is ERC2981, ERC721A, Ownable2Step {
         uint256 burnSum = burnFee * amount;
         LegendX.safeTransferFrom(msg.sender, address(this), burnSum);
         LegendX.burn(burnSum);
-        _mint(msg.sender, amount);
+        _safeMint(msg.sender, amount);
         emit Remint(amount);
     }
 
