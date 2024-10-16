@@ -247,7 +247,7 @@ contract WarChest is ERC2981, ERC721A, Ownable2Step {
     }
 
     function _swapTitanXForLGNDX(uint256 amountInMaximum, uint256 amountOut, uint256 deadline) internal {
-        // _twapCheckExactOutput(TitanX, address(LegendX), amountInMaximum, amountOut);
+        _twapCheckExactOutput(TitanX, address(LegendX), amountInMaximum, amountOut);
         ISwapRouter.ExactOutputSingleParams memory params = ISwapRouter.ExactOutputSingleParams({
             tokenIn: TitanX,
             tokenOut: address(LegendX),
@@ -258,12 +258,15 @@ contract WarChest is ERC2981, ERC721A, Ownable2Step {
             amountInMaximum: amountInMaximum,
             sqrtPriceLimitX96: 0
         });
-
-        IERC20(TitanX).safeIncreaseAllowance(UNISWAP_V3_ROUTER, amountInMaximum);
+        
+        IERC20 titanX = IERC20(TitanX);
+        titanX.safeIncreaseAllowance(UNISWAP_V3_ROUTER, amountInMaximum);
         uint256 amountIn = ISwapRouter(UNISWAP_V3_ROUTER).exactOutputSingle(params);
 
         if (amountIn < amountInMaximum) {
-            IERC20(TitanX).safeTransfer(msg.sender, amountInMaximum - amountIn);
+            uint256 diff = amountInMaximum - amountIn;
+            titanX.safeTransfer(msg.sender, diff);
+            titanX.safeDecreaseAllowance(UNISWAP_V3_ROUTER, diff);
         }
     }
 
@@ -289,8 +292,8 @@ contract WarChest is ERC2981, ERC721A, Ownable2Step {
             tokenIn
         );
 
-        uint256 lowerBound = (twapAmountIn * (10000 - deviation)) / 10000;
+        uint256 upperBound = (maxAmountIn * (10000 + deviation)) / 10000;
 
-        if (maxAmountIn < lowerBound) revert TWAP();
+        if (upperBound < twapAmountIn) revert TWAP();
     }
 }
