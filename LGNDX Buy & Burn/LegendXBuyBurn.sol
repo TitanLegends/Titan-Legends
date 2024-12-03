@@ -50,7 +50,6 @@ contract LegendXBuyBurn is Ownable2Step {
 
     event BuyBurn();
     event EthSwap();
-    event ContractActivated();
 
     // ------------------------------- ERRORS ------------------------------ //
 
@@ -148,7 +147,7 @@ contract LegendXBuyBurn is Ownable2Step {
     /// @notice Sets the cap per swap for ETH -> TitanX swaps.
     /// @param limit The new cap limit in WEI applied to ETH balance.
     function setCapPerSwapEth(uint256 limit) external onlyOwner {
-        capPerSwapX28 = limit;
+        capPerSwapEth = limit;
     }
 
     /// @notice Sets the number of seconds to look back for TWAP price calculations.
@@ -190,7 +189,7 @@ contract LegendXBuyBurn is Ownable2Step {
     /// @return x28Amount X28 amount used in the next swap (if additional swap is needed).
     /// @return nextAvailable Timestamp in seconds when next Buy & Burn will be available.
     function getBuyBurnParams()
-        public
+        external
         view
         returns (bool additionalSwap, uint256 titanXAmount, uint256 x28Amount, uint256 nextAvailable)
     {
