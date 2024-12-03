@@ -204,14 +204,14 @@ contract LegendXBuyBurn is Ownable2Step {
     /// @notice Returns parameters for the next ETH -> TitanX swap.
     /// @return ethAmount ETH amount used in the next swap.
     /// @return nextAvailable Timestamp in seconds when next swap will be available.
-    function getEthSwapParams() public view returns (uint256 ethAmount, uint256 nextAvailable) {
+    function getEthSwapParams() external view returns (uint256 ethAmount, uint256 nextAvailable) {
         uint256 ethBalance = address(this).balance;
         ethAmount = ethBalance > capPerSwapEth ? capPerSwapEth : ethBalance;
         nextAvailable = lastEthSwap + buyBurnInterval;
     }
 
     /// @notice Returns current balances of the Buy & Burn contract.
-    function getBalances() public view returns (uint256 titanXBalance, uint256 x28Balance, uint256 ethBalance) {
+    function getBalances() external view returns (uint256 titanXBalance, uint256 x28Balance, uint256 ethBalance) {
         titanXBalance = IERC20(TITANX).balanceOf(address(this));
         x28Balance = IERC20(X28).balanceOf(address(this));
         ethBalance = address(this).balance;
